@@ -26,9 +26,10 @@ $('#login form').on('submit', e => {
     const data = $('#login form').serialize()
     console.log(data)
     axios.post(`${bsaeUrl}/api/login`, data).then(res => {
-        const { message, status } = res.data
+        const { message, status, token } = res.data
         layer.msg(message)
         if (status === 0) {
+            localStorage.setItem('token', token)
             location.href = '/index.html'
         }
     })
