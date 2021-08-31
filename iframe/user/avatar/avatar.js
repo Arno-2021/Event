@@ -1,9 +1,6 @@
 const token = localStorage.getItem('token')
 const bsaeUrl = 'http://api-breakingnews-web.itheima.net'
-let cropper = new Cropper($('#image')[0], {
-    aspectRatio: 1, // 裁剪图层的横纵比例
-    preview: $('.img-preview'), // 多看文档里每个属性的意思, 一般都会有, 实在没用自己写/换个插件
-})
+let cropper
 $('.select').on('click', e => {
     e.preventDefault()
     $('input[type=file]').click()
@@ -39,3 +36,29 @@ $('.sure').on('click', e => {
             }
         })
 })
+
+function getUser() {
+    //验证token
+    axios
+        .get(`${bsaeUrl}/my/userinfo`, {
+            headers: {
+                Authorization: token,
+            },
+        })
+        .then(res => {
+            if (res.data.status === 0) {
+                let { user_pic } = res.data.data
+                if (user_pic) {
+                    $('#image').prop('src', user_pic)
+                    cropper = new Cropper($('#image')[0], {
+                        aspectRatio: 1, // 裁剪图层的横纵比例
+                        preview: $('.img-preview'), // 多看文档里每个属性的意思, 一般都会有, 实在没用自己写/换个插件
+                    })
+                }
+            } else if (res.data.status === 1) {
+                localStorage.removeItem('token')
+                location.href = '/login.html'
+            }
+        })
+}
+getUser()

@@ -1,7 +1,7 @@
 function getUser() {
-    //验证token
     const token = localStorage.getItem('token')
     const bsaeUrl = 'http://api-breakingnews-web.itheima.net'
+    //验证token
     if (!token) {
         location.href = '/login.html'
     }
