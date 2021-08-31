@@ -30,7 +30,6 @@ function load() {
             },
         })
         .then(res => {
-            console.log(res)
             const { data } = res.data
             $('tbody').empty()
             data.forEach(obj => {
@@ -54,22 +53,24 @@ $('.add').on('click', () => {
         area: ['500px', '300px'],
         title: '新增分类',
         content: add_str, //这里content是一个普通的String
-    })
-    $('.add-form').on('submit', e => {
-        e.preventDefault()
-        const data = $('.add-form').serialize()
-        axios
-            .post(`${bsaeUrl}/my/article/addcates`, data, {
-                headers: {
-                    Authorization: token,
-                },
+        success() {
+            $('.add-form').on('submit', e => {
+                e.preventDefault()
+                const data = $('.add-form').serialize()
+                axios
+                    .post(`${bsaeUrl}/my/article/addcates`, data, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    })
+                    .then(res => {
+                        if (res.data.status === 0) {
+                            layer.close(index)
+                            load()
+                        }
+                    })
             })
-            .then(res => {
-                if (res.data.status === 0) {
-                    layer.close(index)
-                    load()
-                }
-            })
+        },
     })
 })
 $('tbody').on('click', '.delete', e => {
@@ -97,50 +98,51 @@ $('tbody').on('click', '.delete', e => {
         })
 })
 $('tbody').on('click', '.edit', function () {
+    let Id = $(this).attr('myid')
     let index = layer.open({
         type: 1,
         area: ['500px', '300px'],
         title: '编辑分类',
         content: edit_str, //这里content是一个普通的String
-    })
-    let Id = $(this).attr('myid')
-    axios
-        .get(`${bsaeUrl}/my/article/cates/${Id}`, {
-            headers: {
-                Authorization: token,
-            },
-        })
-        .then(res => {
-            const { alias, name } = res.data.data
-            if (res.data.status === 0) {
-                form.val('edit', {
-                    //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
-                    name,
-                    alias,
-                    Id,
+        success() {
+            axios
+                .get(`${bsaeUrl}/my/article/cates/${Id}`, {
+                    headers: {
+                        Authorization: token,
+                    },
                 })
-            }
-        })
-    $('.add-form').on('submit', e => {
-        e.preventDefault()
-        const data = $('.add-form').serialize()
-        axios
-            .post(`${bsaeUrl}/my/article/updatecate`, data, {
-                headers: {
-                    Authorization: token,
-                },
+                .then(res => {
+                    const { alias, name } = res.data.data
+                    if (res.data.status === 0) {
+                        form.val('edit', {
+                            //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
+                            name,
+                            alias,
+                            Id,
+                        })
+                    }
+                })
+            $('.add-form').on('submit', e => {
+                e.preventDefault()
+                const data = $('.add-form').serialize()
+                axios
+                    .post(`${bsaeUrl}/my/article/updatecate`, data, {
+                        headers: {
+                            Authorization: token,
+                        },
+                    })
+                    .then(res => {
+                        if (res.data.status === 0) {
+                            layer.close(index)
+                            layer.msg(res.data.message)
+                            load()
+                        } else {
+                            layer.close(index)
+                            layer.msg(res.data.message)
+                        }
+                    })
             })
-            .then(res => {
-                console.log(res)
-                if (res.data.status === 0) {
-                    layer.close(index)
-                    layer.msg(res.data.message)
-                    load()
-                } else {
-                    layer.close(index)
-                    layer.msg(res.data.message)
-                }
-            })
+        },
     })
 })
 //编辑
