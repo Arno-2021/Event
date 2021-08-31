@@ -1,18 +1,36 @@
-// 1. form标签 - 绑定submit事件
-$(".layui-form").on("submit", e => {
-    e.preventDefault();
-    let obj = {
-        oldPwd: md5($(".layui-form input[name=oldPwd]").val()),
-        newPwd: md5($(".layui-form input[name=newPwd]").val())
-    }
-    let argStr = objToAS(obj);
-    changePassAPI(argStr, res => {
-        // 清除本地的token
-        // 强制跳转到登录页面 - 让用户重新登录
-        setTimeout(() => {
-            sessionStorage.removeItem("token");
-            window.parent.location.href = "/login.html";
-        }, 1500);
-    })
+const token = localStorage.getItem('token')
+const bsaeUrl = 'http://api-breakingnews-web.itheima.net'
+const form = layui.form
+
+form.verify({
+    password: [
+        // 密码
+        /^[\S]{6,10}$/,
+        '密码是6到10位, 不能有空格',
+    ],
+    // 修改密码页面使用 - 新旧密码不能一样
+    diff: function (value) {
+        return $('.oldPwd').val() == value && '新密码和旧密码不能一样'
+    },
+    // 修改密码页 - 使用
+    same: function (value) {
+        return $('.newPwd').val() !== value && '两次密码不相同'
+    },
 })
-// html+css+前端页面的一切功能(交互/验证)+调用接口请求-拿回来数据在回显页面
+
+$('form').on('submit', e => {
+    e.preventDefault()
+    const data = $('form').serialize()
+    axios
+        .post(`${bsaeUrl}/my/updatepwd`, data, {
+            headers: {
+                Authorization: token,
+            },
+        })
+        .then(res => {
+            if (res.data.status === 0) {
+                window.parent.location.href = '/login.html'
+                localStorage.removeItem('token')
+            }
+        })
+})
