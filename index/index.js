@@ -34,6 +34,7 @@ function getUser() {
                         .css('display', 'inline-block')
                         .html(firstLetter)
                 } else {
+                    $('.avatar').css('display', 'none')
                     $('.layui-nav-img')
                         .css('display', 'inline-block')
                         .prop('src', user_pic)
