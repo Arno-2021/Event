@@ -1,4 +1,3 @@
-
 //点击注册切换
 $('#goto-register').on('click', () => {
     $('#register').show()
@@ -30,7 +29,6 @@ $('#goto-login').on('click', () => {
 $('#login form').on('submit', e => {
     e.preventDefault()
     const data = $('#login form').serialize()
-    console.log(data)
     loginApi(data, res => {
         const { message, status, token } = res.data
         layer.msg(message)
