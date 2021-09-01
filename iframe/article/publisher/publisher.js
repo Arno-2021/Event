@@ -1,24 +1,34 @@
-const token = localStorage.getItem('token')
-const bsaeUrl = 'http://api-breakingnews-web.itheima.net'
 
-axios
-    .get(`${bsaeUrl}/my/article/cates`, {
-        headers: {
-            Authorization: token,
-        },
-    })
-    .then(res => {
-        // console.log(res);
-        const { data, status } = res.data
-        if (status === 0) {
-            data.forEach(obj => {
-                const theOption = `<option value="${obj.Id}" lay-verify="cate">${obj.name}</option>`
-                $('select[name=cate_id]').append(theOption)
-                // 让layui刷新一下form表单
-                layui.form.render('select', 'edit')
-            })
-        }
-    })
+
+// axios
+//     .get(`${bsaeUrl}/my/article/cates`, {
+//         headers: {
+//             Authorization: token,
+//         },
+//     })
+//     .then(res => {
+//         // console.log(res);
+//         const { data, status } = res.data
+//         if (status === 0) {
+//             data.forEach(obj => {
+//                 const theOption = `<option value="${obj.Id}" lay-verify="cate">${obj.name}</option>`
+//                 $('select[name=cate_id]').append(theOption)
+//                 // 让layui刷新一下form表单
+//                 layui.form.render('select', 'edit')
+//             })
+//         }
+//     })
+loadCateApi(res => {
+    const { data, status } = res.data
+    if (status === 0) {
+        data.forEach(obj => {
+            const theOption = `<option value="${obj.Id}" lay-verify="cate">${obj.name}</option>`
+            $('select[name=cate_id]').append(theOption)
+            // 让layui刷新一下form表单
+            layui.form.render('select', 'edit')
+        })
+    }
+})
 // 3. 集成图片裁剪的插件
 let cropper
 function initCropper() {
@@ -59,28 +69,23 @@ $('form').on('submit', e => {
         // data.forEach((v, i) => {
         //     console.log(v, i)
         // })
-        axios
-            .post(`${bsaeUrl}/my/article/add`, data, {
-                headers: {
-                    Authorization: token,
-                },
-            })
-            .then(res => {
-                if (res.data.status === 0) {
-                    location.href = '../list/list.html'
-                }
-            })
+        // axios
+        //     .post(`${bsaeUrl}/my/article/add`, data, {
+        //         headers: {
+        //             Authorization: token,
+        //         },
+        //     })
+        //     .then(res => {
+        //         if (res.data.status === 0) {
+        //             location.href = '../list/list.html'
+        //         }
+        //     })
+        pubArticle(data, res => {
+            if (res.data.status === 0) {
+                location.href = '../list/list.html'
+            }
+        })
     })
 })
 // publisher页面 - 文章标题
-const form = layui.form
-form.verify({
-    articleTitle: [
-        /^[\u4E00-\u9FA5a-zA-Z0-9_-]+$/,
-        '标题只能是中英文, 数字下划线中划线组成',
-    ],
-    // 分类判断
-    cate: function () {
-        return $('select[name=cate_id]').val().length == 0 && '请选择文章类别'
-    },
-})
+

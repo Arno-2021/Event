@@ -1,5 +1,3 @@
-const token = localStorage.getItem('token')
-const bsaeUrl = 'http://api-breakingnews-web.itheima.net'
 // 添加类型的 - 弹出层上的 表单标签
 var add_str = `
 <form class="layui-form add-form" action="" style="margin: 30px; margin-left: 0px;" id="add_form">
@@ -23,17 +21,11 @@ var add_str = `
 </div>
 </form>`
 function load() {
-    axios
-        .get(`${bsaeUrl}/my/article/cates`, {
-            headers: {
-                Authorization: token,
-            },
-        })
-        .then(res => {
-            const { data } = res.data
-            $('tbody').empty()
-            data.forEach(obj => {
-                let theTr = $(`<tr>
+    loadCateApi(res => {
+        const { data } = res.data
+        $('tbody').empty()
+        data.forEach(obj => {
+            let theTr = $(`<tr>
               <td>${obj.name}</td>
               <td>${obj.alias}</td>
               <td>
@@ -42,9 +34,31 @@ function load() {
                 <button myid="${obj.Id}" type="button" class="layui-btn layui-btn-xs layui-btn-danger delete">删除</button>
               </td>
             </tr>`)
-                $('tbody').append(theTr)
-            })
+            $('tbody').append(theTr)
         })
+    })
+    // axios
+    //     .get(`${bsaeUrl}/my/article/cates`, {
+    //         headers: {
+    //             Authorization: token,
+    //         },
+    //     })
+    //     .then(res => {
+    //         const { data } = res.data
+    //         $('tbody').empty()
+    //         data.forEach(obj => {
+    //             let theTr = $(`<tr>
+    //           <td>${obj.name}</td>
+    //           <td>${obj.alias}</td>
+    //           <td>
+    //             <button myid="${obj.Id}" data-name="${obj.name}" data-alias="${obj.alias}" type="button" class="layui-btn layui-btn-xs edit">编辑</button>
+
+    //             <button myid="${obj.Id}" type="button" class="layui-btn layui-btn-xs layui-btn-danger delete">删除</button>
+    //           </td>
+    //         </tr>`)
+    //             $('tbody').append(theTr)
+    //         })
+    //     })
 }
 load()
 $('.add').on('click', () => {
@@ -57,45 +71,66 @@ $('.add').on('click', () => {
             $('.add-form').on('submit', e => {
                 e.preventDefault()
                 const data = $('.add-form').serialize()
-                axios
-                    .post(`${bsaeUrl}/my/article/addcates`, data, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    })
-                    .then(res => {
-                        if (res.data.status === 0) {
-                            layer.close(index)
-                            load()
-                        }
-                    })
+                addCateApi(data, res => {
+                    if (res.data.status === 0) {
+                        layer.close(index)
+                        load()
+                    }
+                })
+                // axios
+                //     .post(`${bsaeUrl}/my/article/addcates`, data, {
+                //         headers: {
+                //             Authorization: token,
+                //         },
+                //     })
+                //     .then(res => {
+                //         if (res.data.status === 0) {
+                //             layer.close(index)
+                //             load()
+                //         }
+                //     })
             })
         },
     })
 })
 $('tbody').on('click', '.delete', e => {
     let id = e.target.getAttribute('myid')
-    axios
-        .get(`${bsaeUrl}/my/article/deletecate/${id}`, {
-            headers: {
-                Authorization: token,
-            },
-        })
-        .then(res => {
-            if (res.data.status === 0) {
-                layer.confirm(
-                    '是否要删除？？？',
-                    { icon: 3, title: '提示' },
-                    function (index) {
-                        $(e.target).parents('tr').remove()
-                        layer.msg(res.data.message)
-                        layer.close(index)
-                    }
-                )
-            } else {
-                layer.msg(res.data.message)
-            }
-        })
+    delCateApi(id, res => {
+        if (res.data.status === 0) {
+            layer.confirm(
+                '是否要删除？？？',
+                { icon: 3, title: '提示' },
+                function (index) {
+                    $(e.target).parents('tr').remove()
+                    layer.msg(res.data.message)
+                    layer.close(index)
+                }
+            )
+        } else {
+            layer.msg(res.data.message)
+        }
+    })
+    // axios
+    //     .get(`${bsaeUrl}/my/article/deletecate/${id}`, {
+    //         headers: {
+    //             Authorization: token,
+    //         },
+    //     })
+    //     .then(res => {
+    //         if (res.data.status === 0) {
+    //             layer.confirm(
+    //                 '是否要删除？？？',
+    //                 { icon: 3, title: '提示' },
+    //                 function (index) {
+    //                     $(e.target).parents('tr').remove()
+    //                     layer.msg(res.data.message)
+    //                     layer.close(index)
+    //                 }
+    //             )
+    //         } else {
+    //             layer.msg(res.data.message)
+    //         }
+    //     })
 })
 $('tbody').on('click', '.edit', function () {
     let Id = $(this).attr('myid')
@@ -105,42 +140,63 @@ $('tbody').on('click', '.edit', function () {
         title: '编辑分类',
         content: edit_str, //这里content是一个普通的String
         success() {
-            axios
-                .get(`${bsaeUrl}/my/article/cates/${Id}`, {
-                    headers: {
-                        Authorization: token,
-                    },
-                })
-                .then(res => {
-                    const { alias, name } = res.data.data
-                    if (res.data.status === 0) {
-                        form.val('edit', {
-                            //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
-                            name,
-                            alias,
-                            Id,
-                        })
-                    }
-                })
+            editGetCateApi(Id, res => {
+                const { alias, name } = res.data.data
+                if (res.data.status === 0) {
+                    form.val('edit', {
+                        //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
+                        name,
+                        alias,
+                        Id,
+                    })
+                }
+            })
+            // axios
+            //     .get(`${bsaeUrl}/my/article/cates/${Id}`, {
+            //         headers: {
+            //             Authorization: token,
+            //         },
+            //     })
+            //     .then(res => {
+            //         const { alias, name } = res.data.data
+            //         if (res.data.status === 0) {
+            //             form.val('edit', {
+            //                 //formTest 即 class="layui-form" 所在元素属性 lay-filter="" 对应的值
+            //                 name,
+            //                 alias,
+            //                 Id,
+            //             })
+            //         }
+            //     })
             $('.add-form').on('submit', e => {
                 e.preventDefault()
                 const data = $('.add-form').serialize()
-                axios
-                    .post(`${bsaeUrl}/my/article/updatecate`, data, {
-                        headers: {
-                            Authorization: token,
-                        },
-                    })
-                    .then(res => {
-                        if (res.data.status === 0) {
-                            layer.close(index)
-                            layer.msg(res.data.message)
-                            load()
-                        } else {
-                            layer.close(index)
-                            layer.msg(res.data.message)
-                        }
-                    })
+                editCateApi(data, res => {
+                    if (res.data.status === 0) {
+                        layer.close(index)
+                        layer.msg(res.data.message)
+                        load()
+                    } else {
+                        layer.close(index)
+                        layer.msg(res.data.message)
+                    }
+                })
+                // axios
+                //     .post(`${bsaeUrl}/my/article/updatecate`, data, {
+                //         headers: {
+                //             Authorization: token,
+                //         },
+                //     })
+                //     .then(res => {
+                //         if (res.data.status === 0) {
+                //             layer.close(index)
+                //             layer.msg(res.data.message)
+                //             load()
+                //         } else {
+                //             layer.close(index)
+                //             layer.msg(res.data.message)
+                //         }
+                //     })
             })
         },
     })
@@ -167,8 +223,3 @@ var edit_str = `
       </div>
     </div>
   </form>`
-const form = layui.form
-form.verify({
-    ctname: [/^[\u4E00-\u9FA5]+$/, '分类名只能是中文'],
-    aliname: [/^[a-z0-9]+$/, '小写英文和数字组成'],
-})
